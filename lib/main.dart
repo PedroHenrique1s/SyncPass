@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
+import 'Pages/LoginPage/initialPage.dart';
 
-void main() {
-  runApp(const MainApp());
-}
+void main() => runApp(const MyApp());
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
+    return MaterialApp(
+      title: 'Gerenciador de Senhas',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        scaffoldBackgroundColor:
+            const Color(0xFFFAF9F6), 
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFE0A800), 
+          primary: const Color(0xFFE0A800),
+          secondary: const Color(0xFF424242), 
         ),
+        useMaterial3: true,
       ),
+      home: const LoginPage(),
     );
   }
 }
