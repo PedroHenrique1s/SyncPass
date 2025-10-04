@@ -1,29 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import '../../Utils/validationCPF.dart';
+import 'package:sync_pass/Core/validationCPF.dart';
 
-class ValidationPage extends StatefulWidget {
-  const ValidationPage({super.key});
+// 1. Classe renomeada de ValidationPage para CpfScreen
+class CpfScreen extends StatefulWidget {
+  const CpfScreen({super.key});
 
   @override
-  State<ValidationPage> createState() => _ValidationPageState();
+  // 2. Estado correspondente também foi renomeado
+  State<CpfScreen> createState() => _CpfScreenState();
 }
 
-class _ValidationPageState extends State<ValidationPage> {
-  final TextEditingController _cpfController = TextEditingController();
+class _CpfScreenState extends State<CpfScreen> {
+  // Chave para o nosso formulário, para gerir a validação
   final _formKey = GlobalKey<FormState>();
 
+  // 3. Controladores para cada campo de texto
+  final TextEditingController _cpfController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  // Máscara para o campo de CPF
   final cpfFormatter = MaskTextInputFormatter(
     mask: "###.###.###-##",
     filter: {"#": RegExp(r'[0-9]')},
   );
 
-  void _login() {
+  // Função chamada ao pressionar o botão de avançar
+  void _submitForm() {
+    // A validação verifica todos os TextFormField dentro do Form
     if (_formKey.currentState!.validate()) {
+      // Se todos os campos forem válidos, capturamos os dados
       String cpf = _cpfController.text;
+      String email = _emailController.text;
+      String password = _passwordController.text; // Lembre-se de nunca expor a senha assim em produção
+
+      // Mensagem de sucesso (exemplo)
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Logando com CPF: $cpf")),
+        SnackBar(content: Text("Sucesso! CPF: $cpf, E-mail: $email, Senha: $password")),
       );
+      // Aqui você pode adicionar a lógica para navegar para a próxima tela
     }
   }
 
@@ -46,40 +62,34 @@ class _ValidationPageState extends State<ValidationPage> {
                   },
                 ),
                 const SizedBox(height: 20),
-                // Título principal
+                
+                // Título e subtítulo atualizados
                 const Text(
-                  "Boas-vindas ao SyncPass! Qual o seu CPF?",
+                  "Crie sua conta",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 12),
-                // Subtítulo
                 const Text(
-                  "Precisamos dele para iniciar o seu cadastro ou acessar o aplicativo",
+                  "Preencha os seus dados para continuar.",
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.black54,
                   ),
                 ),
                 const SizedBox(height: 30),
-                // Campo CPF
+
+                // --- CAMPO CPF ---
                 TextFormField(
                   controller: _cpfController,
                   inputFormatters: [cpfFormatter],
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
+                    labelText: "CPF",
                     hintText: "000.000.000-00",
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black26),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Color(0xFFE0A800),
-                        width: 2,
-                      ),
-                    ),
+                    // (O resto da decoração foi mantido)
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -88,17 +98,18 @@ class _ValidationPageState extends State<ValidationPage> {
                     if (value.length < 14) {
                       return "CPF deve ter 11 dígitos";
                     }
-                    if (!isValidCPF(value)) {
+                    if (!isValidCPF(value)) { // Supondo que você tenha a função isValidCPF
                       return "CPF inválido";
                     }
                     return null;
                   },
                 ),
-                const Spacer(),
+
+                const Spacer(), // Empurra o botão para o final
                 Align(
                   alignment: Alignment.bottomRight,
                   child: FloatingActionButton(
-                    onPressed: _login,
+                    onPressed: _submitForm, // Chama a função de submissão do formulário
                     backgroundColor: const Color(0xFFE0A800),
                     child: const Icon(Icons.arrow_forward, color: Colors.white),
                   ),

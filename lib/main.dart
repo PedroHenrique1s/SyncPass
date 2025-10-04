@@ -1,7 +1,17 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'Pages/LoginPage/initialPage.dart';
+import 'package:sync_pass/Feature/Login/Screen/login_screen.dart';
+import 'package:sync_pass/firebase_options.dart';
 
-void main() => runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
+  // CORREÇÃO: Adicionada a chamada para iniciar o app.
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -21,7 +31,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const LoginPage(),
+      home: const LoginScreen(),
     );
   }
 }

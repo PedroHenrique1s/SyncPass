@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "171363030253",
+    "project_id": "syncpass-157f7",
+    "storage_bucket": "syncpass-157f7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:171363030253:android:4febb1e01753045916e8e4",
+        "android_client_info": {
+          "package_name": "com.example.sync_pass"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "171363030253-a0p85bjn8q2e7v4r191psrbgmla3pqa1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sync_pass",
+            "certificate_hash": "932a08716cb730611f4d56d21ef2f16ccdb003fb"
+          }
+        },
+        {
+          "client_id": "171363030253-hejfi5lk2aqkncnfd0g94puip25fs1ta.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMykGh0KuDFkJEDAASExKhwPkyYzakBeI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "171363030253-hejfi5lk2aqkncnfd0g94puip25fs1ta.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "171363030253-fcplvi2cq3afl1kf2qh08ha0p3gb7dds.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.syncPass"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
