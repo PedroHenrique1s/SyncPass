@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'validationPage.dart';
+import 'package:sync_pass/Feature/Login/Screen/cpf_sreen.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+// A classe foi renomeada de LoginPage para LoginScreen
+class LoginScreen extends StatelessWidget {
+  // O construtor também foi atualizado para corresponder ao novo nome da classe
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -69,11 +71,11 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  // Função que cria a rota com animação
+  // Função que cria a rota com animação (não precisou de alterações)
   Route _createRoute() {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) =>
-          const ValidationPage(), // <- nome correto da página de CPF
+          const CpfScreen(), // <- nome correto da página de CPF
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0); // Animação da direita para a esquerda
         const end = Offset.zero;

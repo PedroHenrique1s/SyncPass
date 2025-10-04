@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'Pages/LoginPage/initialPage.dart';
+import 'package:sync_pass/Feature/Login/Screen/login_screen.dart';
 
 void main() => runApp(const MyApp());
 
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const LoginPage(),
+      home: const LoginScreen(),
     );
   }
 }
