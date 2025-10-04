@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:sync_pass/Feature/Home/Screen/home.dart';
+import 'package:sync_pass/Feature/Home/Screen/home_screen.dart';
 import 'package:sync_pass/Feature/Login/Screen/login_screen.dart';
 
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sync_pass/Feature/Home/Screen/home.dart';
+import 'package:sync_pass/Feature/Home/Screen/home_screen.dart';
 import 'package:sync_pass/Feature/Login/Screen/cpf_sreen.dart';
 import 'package:sync_pass/Feature/Login/Services/auth_method.dart';
 
