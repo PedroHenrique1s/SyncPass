@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sync_pass/Feature/Home/Screen/home_screen.dart';
-import 'package:sync_pass/Feature/Login/Screen/cpf_sreen.dart';
+import 'package:sync_pass/Feature/Login/Screen/newlogin_screen.dart';
 import 'package:sync_pass/Feature/Login/Services/auth_method.dart';
 
 // ATENÇÃO: Verifique se este caminho para o seu serviço de autenticação está correto!
@@ -62,99 +62,105 @@ Future<void> _signInWithGoogle() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAF9F6),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const SizedBox(height: 40),
-            Column(
+      // NOVO: Container com um fundo gradiente suave
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white,
+              const Color(0xFFFAF9F6).withOpacity(0.8),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center, // ALTERADO: Centralizando todo o conteúdo
               children: [
-                Image.asset(
-                  'images/Logo.png',
-                  height: 220,
-                ),
-                const SizedBox(height: 20),
+                const Spacer(flex: 2),
+
+                // --- SEÇÃO PRINCIPAL COM LOGO E TEXTOS ---
+                Image.asset('images/Logo.png', height: 180),
+                const SizedBox(height: 24),
                 const Text(
                   'SyncPass',
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 40,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF424242),
+                    shadows: [
+                      Shadow(
+                        blurRadius: 2.0,
+                        color: Colors.black26,
+                        offset: Offset(1.0, 1.0),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
                 const Text(
-                  'Seu cofre digital\nsem complicações',
+                  'Seu cofre digital sem complicações',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF424242),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black54,
                   ),
                 ),
+
+                const Spacer(flex: 3),
+
+                // --- SEÇÃO DE BOTÕES ---
+                // A lógica de loading continua envolvendo os botões
+                _isLoading
+                    ? const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFE0A800)),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Botão de E-mail
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(context).push(_createRoute()),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFE0A800),
+                              foregroundColor: const Color(0xFF424242),
+                              minimumSize: const Size(double.infinity, 50),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 3,
+                            ),
+                            child: const Text(
+                              'Conectar com E-mail',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Botão do Google
+                          ElevatedButton.icon(
+                            icon: Image.asset('images/google_logo.png', height: 22.0),
+                            label: const Text('Conectar com Google', style: TextStyle(fontWeight: FontWeight.bold)),
+                            onPressed: _signInWithGoogle,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black87,
+                              minimumSize: const Size(double.infinity, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: Colors.grey.shade300),
+                              ),
+                              elevation: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                const Spacer(flex: 1),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              // ALTERADO: Mostra o indicador de carregamento ou os botões.
-              child: _isLoading
-                  ? const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFE0A800)),
-                    )
-                  : Column( 
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(_createRoute());
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE0A800),
-                            minimumSize: const Size(double.infinity, 50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          child: const Text(
-                            'Começar',
-                            style: TextStyle(
-                              color: Color(0xFF424242),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12), // Espaçamento entre os botões
-
-                        // 2. NOVO: Botão "Login with Google"
-                        ElevatedButton.icon(
-                          icon: Image.asset(
-                            'images/google_logo.png', // Verifique se este asset está no seu projeto
-                            height: 24.0,
-                          ),
-                          label: const Text(
-                            'Login com Google',
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          onPressed: _signInWithGoogle,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black,
-                            elevation: 2,
-                            minimumSize: const Size(double.infinity, 50),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30.0),
-                            ),
-                            side: BorderSide(color: Colors.grey.shade300)
-                          ),
-                        ),
-                      ],
-                    ),
-            )
-          ],
+          ),
         ),
       ),
     );
@@ -164,7 +170,7 @@ Future<void> _signInWithGoogle() async {
   Route _createRoute() {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) =>
-          const CpfScreen(),
+          const NewLoginScreen(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
         const end = Offset.zero;
