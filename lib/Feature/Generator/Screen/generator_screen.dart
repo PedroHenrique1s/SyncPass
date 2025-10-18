@@ -1,7 +1,9 @@
-// generator_screen.dart
-
 import 'package:flutter/material.dart';
-import 'dart:math'; // Para a lógica de geração de senha
+import 'package:flutter/services.dart'; // IMPORTANTE: Para usar a área de transferência (Clipboard)
+import 'dart:math';
+
+// Cor padrão do app
+const Color customYellow = Color(0xFFEEBF3A);
 
 class GeneratorScreen extends StatefulWidget {
   const GeneratorScreen({super.key});
@@ -11,19 +13,22 @@ class GeneratorScreen extends StatefulWidget {
 }
 
 class _GeneratorScreenState extends State<GeneratorScreen> {
-  // Estado dos checkboxes
+  // Variáveis de estado para as opções do gerador
   bool _includeUppercase = true;
   bool _includeLowercase = true;
   bool _includeNumbers = true;
   bool _includeSymbols = false;
-  
-  // Tamanho da senha
-  double _passwordLength = 12;
-  
-  // Senha gerada
+  double _passwordLength = 16;
   String _generatedPassword = '';
 
-  // Lógica para gerar a senha
+  @override
+  void initState() {
+    super.initState();
+    // Gera uma senha assim que a tela é carregada
+    _generatePassword();
+  }
+
+  // Lógica principal para gerar a senha (mantida como estava, pois é eficiente)
   void _generatePassword() {
     String availableChars = '';
     if (_includeUppercase) availableChars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -33,147 +38,159 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
 
     if (availableChars.isEmpty) {
       setState(() {
-        _generatedPassword = 'Selecione pelo menos um tipo de caractere.';
+        _generatedPassword = 'Selecione uma opção!';
       });
       return;
     }
 
-    final Random random = Random();
-    String newPassword = '';
-    for (int i = 0; i < _passwordLength.round(); i++) {
-      newPassword += availableChars[random.nextInt(availableChars.length)];
-    }
+    final Random random = Random.secure(); // Usar Random.secure() é mais seguro
+    final newPassword = String.fromCharCodes(Iterable.generate(
+      _passwordLength.round(),
+      (_) => availableChars.codeUnitAt(random.nextInt(availableChars.length)),
+    ));
 
     setState(() {
       _generatedPassword = newPassword;
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // Gera a senha inicial ao carregar a tela
-    _generatePassword();
+  // Função para copiar a senha para a área de transferência
+  void _copyToClipboard() {
+    // Verifica se a senha não é uma mensagem de erro
+    if (_generatedPassword.isNotEmpty && _generatedPassword != 'Selecione uma opção!') {
+      Clipboard.setData(ClipboardData(text: _generatedPassword)).then((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Senha copiada para a área de transferência!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      });
+    }
   }
   
-  // Widget para copiar a senha (simulado)
-  void _copyToClipboard() {
-    // Implemente a lógica de copiar para a área de transferência
-    // Flutter: `Clipboard.setData(ClipboardData(text: _generatedPassword))`
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Senha copiada: $_generatedPassword')),
+  // Widget auxiliar para os títulos das seções
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 24, bottom: 8, left: 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Gerador de Senhas', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
+        title: const Text('Gerador de Senhas', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600)),
+        backgroundColor: Colors.grey[100],
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Exibição da senha
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(10),
+            Card(
+                elevation: 0, 
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          _generatedPassword,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87, 
+                            letterSpacing: 1.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.refresh, color: customYellow), 
+                        onPressed: _generatePassword,
+                        tooltip: 'Gerar Nova Senha',
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              child: Text(
-                _generatedPassword,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(height: 10),
-            // Botão para copiar
+            const SizedBox(height: 8),
             ElevatedButton.icon(
-              onPressed: _generatedPassword.isNotEmpty ? _copyToClipboard : null,
-              icon: const Icon(Icons.copy),
-              label: const Text('Copiar'),
+              onPressed: _copyToClipboard,
+              icon: const Icon(Icons.copy_rounded, size: 20),
+              label: const Text('Copiar Senha'),
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: const Color(0xFFE0A800),
+                backgroundColor: customYellow,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 2,
               ),
             ),
-            const SizedBox(height: 30),
 
-            // Opções de caracteres
-            const Text(
-              'Opções de Caracteres',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+            // --- SEÇÃO DE OPÇÕES ---
+            _buildSectionTitle('Opções'),
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    title: const Text('Letras Maiúsculas (A-Z)'),
+                    value: _includeUppercase,
+                    onChanged: (value) => setState(() { _includeUppercase = value; _generatePassword(); }),
+                    activeColor: customYellow,
+                  ),
+                  SwitchListTile(
+                    title: const Text('Letras Minúsculas (a-z)'),
+                    value: _includeLowercase,
+                    onChanged: (value) => setState(() { _includeLowercase = value; _generatePassword(); }),
+                    activeColor: customYellow,
+                  ),
+                  SwitchListTile(
+                    title: const Text('Números (0-9)'),
+                    value: _includeNumbers,
+                    onChanged: (value) => setState(() { _includeNumbers = value; _generatePassword(); }),
+                    activeColor: customYellow,
+                  ),
+                  SwitchListTile(
+                    title: const Text('Símbolos (!@#\$%)'),
+                    value: _includeSymbols,
+                    onChanged: (value) => setState(() { _includeSymbols = value; _generatePassword(); }),
+                    activeColor: customYellow,
+                  ),
+                ],
+              ),
             ),
-            CheckboxListTile(
-              title: const Text('Incluir letras maiúsculas (A-Z)'),
-              value: _includeUppercase,
-              onChanged: (bool? value) {
-                setState(() {
-                  _includeUppercase = value!;
-                  _generatePassword();
-                });
-              },
-            ),
-            CheckboxListTile(
-              title: const Text('Incluir letras minúsculas (a-z)'),
-              value: _includeLowercase,
-              onChanged: (bool? value) {
-                setState(() {
-                  _includeLowercase = value!;
-                  _generatePassword();
-                });
-              },
-            ),
-            CheckboxListTile(
-              title: const Text('Incluir números (0-9)'),
-              value: _includeNumbers,
-              onChanged: (bool? value) {
-                setState(() {
-                  _includeNumbers = value!;
-                  _generatePassword();
-                });
-              },
-            ),
-            CheckboxListTile(
-              title: const Text('Incluir símbolos (!@#\$%)'),
-              value: _includeSymbols,
-              onChanged: (bool? value) {
-                setState(() {
-                  _includeSymbols = value!;
-                  _generatePassword();
-                });
-              },
-            ),
-            const SizedBox(height: 30),
 
-            // Slider para o tamanho da senha
-            const Text(
-              'Tamanho da Senha',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
-            ),
-            Slider(
-              value: _passwordLength,
-              min: 4,
-              max: 32,
-              divisions: 28,
-              label: _passwordLength.round().toString(),
-              activeColor: const Color(0xFFE0A800),
-              onChanged: (double value) {
-                setState(() {
-                  _passwordLength = value;
-                  _generatePassword();
-                });
-              },
-            ),
-            Text(
-              'Comprimento: ${_passwordLength.round()}',
-              textAlign: TextAlign.center,
+            // --- SEÇÃO DE TAMANHO ---
+            _buildSectionTitle('Tamanho da Senha: ${_passwordLength.round()}'),
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Slider(
+                value: _passwordLength,
+                min: 6,
+                max: 32,
+                divisions: 26,
+                label: _passwordLength.round().toString(),
+                activeColor: customYellow,
+                inactiveColor: Colors.grey[300],
+                onChanged: (value) => setState(() { _passwordLength = value; _generatePassword(); }),
+              ),
             ),
           ],
         ),
