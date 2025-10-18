@@ -1,89 +1,97 @@
-// passcode_screen.dart
-
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:sync_pass/Feature/AddPass/Screen/add_pass_screen.dart';
+import 'package:sync_pass/Feature/Passcode/Models/password_item.dart';
+import 'package:sync_pass/Feature/Passcode/Services/savePass.dart';
+import 'package:sync_pass/Feature/Passcode/Widgets/password_list_item.dart';
 
-class PasscodeScreen extends StatelessWidget {
+const Color customYellow = Color(0xFFE0A800);
+
+class PasscodeScreen extends StatefulWidget {
   const PasscodeScreen({super.key});
 
-  // Lista de exemplo para simular senhas salvas
-  final List<Map<String, dynamic>> _dummyPasswords = const [
-    {
-      'service': 'Google',
-      'username': 'meu.email@gmail.com',
-    },
-    {
-      'service': 'Netflix',
-      'username': 'nome.usuario',
-    },
-    {
-      'service': 'GitHub',
-      'username': 'meu-usuario-dev',
-    },
-    {
-      'service': 'Nubank',
-      'username': '000000000-00',
-    },
-  ];
+  @override
+  State<PasscodeScreen> createState() => _PasscodeScreenState();
+}
+
+class _PasscodeScreenState extends State<PasscodeScreen> {
+  // O service e o stream
+  late final PasswordService _passwordService;
+  Stream<QuerySnapshot>? _passwordsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _passwordService = PasswordService();
+    _passwordsStream = _passwordService.getPasswordsStream();
+  }
+
+  // O MÉTODO _buildItemCard FOI COMPLETAMENTE REMOVIDO DAQUI
 
   @override
   Widget build(BuildContext context) {
-    // Definindo a cor amarela customizada
-    const Color customYellow = Color(0xFFE0A800);
-
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Minhas Senhas', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
+        title: const Text('Meus Itens Salvos', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600)),
+        backgroundColor: Colors.grey[100],
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: _dummyPasswords.isEmpty
-          ? const Center(
-              child: Text(
-                'Nenhuma senha encontrada.',
-                style: TextStyle(fontSize: 18, color: Colors.grey),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _passwordsStream,
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator(color: customYellow));
+          }
+          if (snapshot.hasError) {
+            return const Center(child: Text('Ocorreu um erro ao carregar os itens.'));
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            // Este widget de "estado vazio" também poderia ser refatorado
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.vpn_key_off_outlined, size: 80, color: Colors.grey[400]),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Nenhum item encontrado',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                  const Text(
+                    'Toque no botão + para adicionar o seu primeiro.',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ],
               ),
-            )
-          : ListView.builder(
-              itemCount: _dummyPasswords.length,
-              itemBuilder: (context, index) {
-                final password = _dummyPasswords[index];
-                return Column(
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.lock, color: customYellow),
-                      title: Text(
-                        password['service'],
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        password['username'],
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.copy, size: 20),
-                        onPressed: () {
-                          // TODO: Lógica para copiar a senha para a área de transferência
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Senha de ${password['service']} copiada.'),
-                            ),
-                          );
-                        },
-                      ),
-                      onTap: () {
-                        // TODO: Lógica para exibir a senha ou editar os detalhes
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Você clicou em ${password['service']}'),
-                          ),
-                        );
-                      },
-                    ),
-                    const Divider(),
-                  ],
-                );
-              },
-            ),
+            );
+          }
+
+          // MUDANÇA PRINCIPAL AQUI:
+          return ListView(
+            padding: const EdgeInsets.only(top: 8, bottom: 90),
+            children: snapshot.data!.docs.map((DocumentSnapshot document) {
+              // 1. Converte o documento para o nosso model limpo
+              final item = PasswordItem.fromDocument(document);
+              // 2. Retorna o nosso widget limpo
+              return PasswordListItem(item: item);
+            }).toList(),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddPassScreen()),
+          );
+        },
+        backgroundColor: customYellow,
+        foregroundColor: Colors.black,
+        tooltip: 'Adicionar Novo Item',
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }
