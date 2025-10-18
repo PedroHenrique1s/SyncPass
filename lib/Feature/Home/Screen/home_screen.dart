@@ -1,35 +1,79 @@
-// home_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:sync_pass/Feature/Login/Screen/login_screen.dart';
 import 'package:sync_pass/Feature/Login/Services/auth_method.dart';
 import 'package:sync_pass/Feature/Generator/Screen/generator_screen.dart';
 import 'package:sync_pass/Feature/AddPass/Screen/add_pass_screen.dart';
 import 'package:sync_pass/Feature/Passcode/Screen/passcode_screen.dart';
 
-// Definindo a nova cor amarela
+// Definindo a cor amarela customizada
 const Color customYellow = Color(0xFFE0A800);
 
-class HomeScreen extends StatelessWidget {
+// Convertemos para StatefulWidget para buscar dados
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late PageController _pageController;
+  int _currentPageIndex = 0;
+
+  final List<Map<String, dynamic>> _securityTips = [
+    {
+      'icon': Icons.lightbulb_outline,
+      'title': 'Use Senhas Fortes',
+      'description': 'Combine letras maiúsculas, minúsculas, números e símbolos. Use o gerador de senhas!',
+    },
+    {
+      'icon': Icons.shield_outlined,
+      'title': 'Ative a Verificação em Duas Etapas (2FA)',
+      'description': 'Sempre que possível, ative o 2FA para uma camada extra de segurança em suas contas.',
+    },
+    {
+      'icon': Icons.phishing_outlined,
+      'title': 'Cuidado com Phishing',
+      'description': 'Nunca clique em links suspeitos ou forneça suas senhas por e-mail ou mensagens.',
+    },
+    {
+      'icon': Icons.lock_reset_outlined,
+      'title': 'Atualize Senhas Antigas',
+      'description': 'Evite reutilizar senhas e troque senhas de serviços importantes periodicamente.',
+    }
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicializa o PageController aqui!
+    _pageController = PageController(viewportFraction: 0.9, initialPage: 0);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final User? user = GoogleSignInService.getCurrentUser();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[100], // Um fundo mais suave
       appBar: AppBar(
         title: const Text(
           'SyncPass',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: customYellow.withAlpha(102),
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.black),
+            icon: const Icon(Icons.logout, color: Colors.black54),
             tooltip: 'Sair',
             onPressed: () async {
               await GoogleSignInService.signOut();
@@ -44,94 +88,98 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Seção de Boas-Vindas e Avatar
-              _buildUserInfoSection(user),
-              const SizedBox(height: 30),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [  
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: _buildUserInfoSection(user),
+            ),
+            
+            const SizedBox(height: 20),
+            _buildSecurityTipsCarousel(),
 
-              // Seção de Menu Central (Grid de Botões)
-              _buildMenuGrid(context),
-              const SizedBox(height: 30),
+            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: _buildMenuGrid(context),
+            ),
 
-              // Seção de Informações Adicionais (Cards)
-              _buildRecentPasswordsSection(),
-            ],
-          ),
+            const SizedBox(height: 30), // Espaço no final
+          ],
         ),
       ),
     );
   }
 
-  // --- Widgets Auxiliares para o Novo Layout ---
-
   Widget _buildUserInfoSection(User? user) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        CircleAvatar(
-          radius: 40,
-          backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
-          child: user?.photoURL == null ? const Icon(Icons.person, size: 40, color: Colors.grey) : null,
-        ),
-        const SizedBox(height: 10),
-        Text(
-          'Bem-vindo(a), ${user?.displayName ?? 'Usuário'}!',
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+    return Container(
+      padding: const EdgeInsets.all(16), // <-- Padding reduzido
+      decoration: BoxDecoration(
+        color: Colors.white, // <-- Cor alterada para branco
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [ // Sombra suave para consistência
+          BoxShadow(
+            color: Colors.grey.withAlpha(26),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
-        ),
-        const SizedBox(height: 5),
-        Text(
-          user?.email ?? '',
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.grey,
+        ],
+      ),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 35, // <-- Raio reduzido
+            backgroundColor: Colors.grey[200],
+            backgroundImage: user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
+            child: user?.photoURL == null 
+                ? const Icon(Icons.person, size: 35, color: Colors.grey) 
+                : null,
           ),
-        ),
-      ],
+          const SizedBox(height: 12),
+          Text(
+            'Bem-vindo(a), ${user?.displayName?.split(' ')[0] ?? 'Usuário'}!',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 22, // <-- Fonte reduzida
+              fontWeight: FontWeight.bold,
+              color: Colors.black87, // <-- Cor alterada
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            user?.email ?? '',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14, // <-- Fonte reduzida
+              color: Colors.grey[700], // <-- Cor alterada
+            ),
+          ),
+        ],
+      ),
     );
   }
 
+  // 2. Grid de menu com cards mais refinados.
   Widget _buildMenuGrid(BuildContext context) {
-    // Lista de opções do menu
-    // Dentro de _buildMenuGrid
-
-final List<Map<String, dynamic>> menuItems = [
-  {'title': 'Minhas Senhas', 'icon': Icons.lock, 'onTap': () {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const PasscodeScreen()),
-    );
-  }},
-  {'title': 'Adicionar Nova', 'icon': Icons.add_circle, 'onTap': () {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const AddPassScreen()),
-    );
-  }},
-  {'title': 'Gerar Senha', 'icon': Icons.vpn_key, 'onTap': () {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const GeneratorScreen()),
-    );
-  }},
-  {'title': 'Configurações', 'icon': Icons.settings, 'onTap': () { /* ... */ }},
-];
+    final List<Map<String, dynamic>> menuItems = [
+      {'title': 'Minhas Senhas', 'icon': Icons.lock_outline, 'onTap': () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PasscodeScreen()))},
+      {'title': 'Nova Senha', 'icon': Icons.add_circle_outline, 'onTap': () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddPassScreen()))},
+      {'title': 'Gerar Senha', 'icon': Icons.vpn_key_outlined, 'onTap': () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GeneratorScreen()))},
+      {'title': 'Anexar Arquivos', 'icon': Icons.folder_copy_outlined, 'onTap': () { /* Lógica de navegação */ }},
+    ];
 
     return GridView.builder(
-      shrinkWrap: true, // Para o GridView se adaptar ao espaço da Column
-      physics: const NeverScrollableScrollPhysics(), // Desativa o scroll do GridView
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: menuItems.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // 2 colunas
-        childAspectRatio: 1.5, // Proporção para deixar os itens retangulares
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
+        crossAxisCount: 2,
+        childAspectRatio: 1.2, // Proporção ajustada
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
       ),
       itemBuilder: (context, index) {
         final item = menuItems[index];
@@ -144,39 +192,36 @@ final List<Map<String, dynamic>> menuItems = [
     );
   }
 
-  Widget _buildMenuItemCard({
-    required String title,
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildMenuItemCard({required String title, required IconData icon, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF0F0F0),
-          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withAlpha(26),
               spreadRadius: 2,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
             ),
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 40, color: customYellow), // Cor alterada aqui!
-            const SizedBox(height: 10),
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: customYellow.withAlpha(26),
+              child: Icon(icon, size: 28, color: customYellow),
+            ),
+            const SizedBox(height: 12),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87),
             ),
           ],
         ),
@@ -184,48 +229,121 @@ final List<Map<String, dynamic>> menuItems = [
     );
   }
 
-  Widget _buildRecentPasswordsSection() {
+  Widget _buildSecurityTipsCarousel() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Senhas Recentes',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+        // Título da Seção
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            'Dicas de Segurança',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
           ),
         ),
-        const SizedBox(height: 10),
-        // Exemplo de um item de senha
-        _buildPasswordItem(
-          title: 'Google',
-          subtitle: 'Último acesso em 10/10/2025',
-          icon: Icons.lock_open,
+        const SizedBox(height: 16),
+
+        // O Carrossel (PageView)
+        SizedBox(
+          height: 160, // Altura fixa para os cards
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: _securityTips.length,
+            onPageChanged: (index) {
+              setState(() {
+                _currentPageIndex = index;
+              });
+            },
+            itemBuilder: (context, index) {
+              final tip = _securityTips[index];
+              return _buildSecurityTipCard(
+                icon: tip['icon'],
+                title: tip['title'],
+                description: tip['description'],
+              );
+            },
+          ),
         ),
-        const Divider(),
-        _buildPasswordItem(
-          title: 'GitHub',
-          subtitle: 'Último acesso em 09/10/2025',
-          icon: Icons.lock_open,
+        const SizedBox(height: 16),
+
+        // Os Indicadores (pontos)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(_securityTips.length, (index) {
+            return _buildDotIndicator(isActive: index == _currentPageIndex);
+          }),
         ),
       ],
     );
   }
 
-  Widget _buildPasswordItem({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: customYellow), // Cor alterada aqui!
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(subtitle),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        // Ação para visualizar a senha
-      },
+  Widget _buildSecurityTipCard({required IconData icon, required String title, required String description}) {
+    return Container(
+      // Espaçamento entre os cards (metade do que não é viewportFraction)
+      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withAlpha(26), // Sombra suave
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundColor: customYellow.withAlpha(26), // Fundo amarelo suave
+            child: Icon(icon, size: 22, color: customYellow),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            description,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[700],
+              height: 1.3, // Espaçamento entre linhas
+            ),
+            maxLines: 3, // Limita a 3 linhas
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
+
+  Widget _buildDotIndicator({required bool isActive}) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
+      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+      height: 8.0,
+      width: isActive ? 24.0 : 8.0, // Ponto ativo é mais largo
+      decoration: BoxDecoration(
+        color: isActive ? customYellow : Colors.grey[300],
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
+  }
+
 }
