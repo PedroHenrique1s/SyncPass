@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // IMPORTANTE: Para usar a área de transferência (Clipboard)
+import 'package:flutter/services.dart'; 
 import 'dart:math';
 
-// Cor padrão do app
 const Color customYellow = Color(0xFFEEBF3A);
 
 class GeneratorScreen extends StatefulWidget {
@@ -13,7 +12,6 @@ class GeneratorScreen extends StatefulWidget {
 }
 
 class _GeneratorScreenState extends State<GeneratorScreen> {
-  // Variáveis de estado para as opções do gerador
   bool _includeUppercase = true;
   bool _includeLowercase = true;
   bool _includeNumbers = true;
@@ -24,11 +22,9 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
   @override
   void initState() {
     super.initState();
-    // Gera uma senha assim que a tela é carregada
     _generatePassword();
   }
 
-  // Lógica principal para gerar a senha (mantida como estava, pois é eficiente)
   void _generatePassword() {
     String availableChars = '';
     if (_includeUppercase) availableChars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -43,7 +39,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
       return;
     }
 
-    final Random random = Random.secure(); // Usar Random.secure() é mais seguro
+    final Random random = Random.secure(); 
     final newPassword = String.fromCharCodes(Iterable.generate(
       _passwordLength.round(),
       (_) => availableChars.codeUnitAt(random.nextInt(availableChars.length)),
@@ -54,11 +50,10 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     });
   }
 
-  // Função para copiar a senha para a área de transferência
   void _copyToClipboard() {
-    // Verifica se a senha não é uma mensagem de erro
     if (_generatedPassword.isNotEmpty && _generatedPassword != 'Selecione uma opção!') {
       Clipboard.setData(ClipboardData(text: _generatedPassword)).then((_) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Senha copiada para a área de transferência!'),
@@ -69,7 +64,6 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     }
   }
   
-  // Widget auxiliar para os títulos das seções
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 24, bottom: 8, left: 8),
@@ -141,36 +135,39 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
               ),
             ),
 
-            // --- SEÇÃO DE OPÇÕES ---
             _buildSectionTitle('Opções'),
             Card(
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Column(
-                children: [
+               children: [
                   SwitchListTile(
                     title: const Text('Letras Maiúsculas (A-Z)'),
                     value: _includeUppercase,
                     onChanged: (value) => setState(() { _includeUppercase = value; _generatePassword(); }),
-                    activeColor: customYellow,
+                    activeThumbColor: customYellow,
+                    activeTrackColor: customYellow.withAlpha(102),
                   ),
                   SwitchListTile(
                     title: const Text('Letras Minúsculas (a-z)'),
                     value: _includeLowercase,
                     onChanged: (value) => setState(() { _includeLowercase = value; _generatePassword(); }),
-                    activeColor: customYellow,
+                    activeThumbColor: customYellow,
+                    activeTrackColor: customYellow.withAlpha(102),
                   ),
                   SwitchListTile(
                     title: const Text('Números (0-9)'),
                     value: _includeNumbers,
                     onChanged: (value) => setState(() { _includeNumbers = value; _generatePassword(); }),
-                    activeColor: customYellow,
+                    activeThumbColor: customYellow,
+                    activeTrackColor: customYellow.withAlpha(102),
                   ),
                   SwitchListTile(
                     title: const Text('Símbolos (!@#\$%)'),
                     value: _includeSymbols,
                     onChanged: (value) => setState(() { _includeSymbols = value; _generatePassword(); }),
-                    activeColor: customYellow,
+                    activeThumbColor: customYellow,
+                    activeTrackColor: customYellow.withAlpha(102),
                   ),
                 ],
               ),
