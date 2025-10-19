@@ -139,7 +139,7 @@ class _AddPassScreenState extends State<AddPassScreen> {
           children: [
             // Dropdown de seleção de tipo
             DropdownButtonFormField<PasswordType>(
-              value: _selectedType,
+              initialValue: _selectedType,
               decoration: InputDecoration(
                 labelText: 'Tipo de Item',
                 filled: true,

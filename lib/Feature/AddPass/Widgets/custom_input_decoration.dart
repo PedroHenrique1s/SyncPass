@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Note que isso é uma FUNÇÃO, não uma classe/widget
 InputDecoration buildInputDecoration({
   required String labelText,
   required IconData icon,

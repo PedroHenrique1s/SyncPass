@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'custom_input_decoration.dart'; // Importa a função
-import 'password_form_field.dart'; // Importa o widget de senha
+import 'custom_input_decoration.dart'; 
+import 'password_form_field.dart'; 
 
 class LoginForm extends StatelessWidget {
-  // Ele só precisa dos controllers
+
   final TextEditingController titleController;
   final TextEditingController usernameController;
   final TextEditingController passwordController;

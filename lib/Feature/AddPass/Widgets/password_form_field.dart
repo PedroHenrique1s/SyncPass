@@ -1,17 +1,16 @@
-// Em: AddPass/Widgets/password_form_field.dart
 import 'package:flutter/material.dart';
 import 'custom_input_decoration.dart';
 
 class PasswordFormField extends StatefulWidget {
   final TextEditingController controller;
   final String labelText;
-  final IconData icon; // <-- 1. ADICIONE ESTA LINHA
+  final IconData icon;
 
   const PasswordFormField({
     super.key,
     required this.controller,
     required this.labelText,
-    required this.icon, // <-- 2. E ADICIONE ESTA LINHA
+    required this.icon, 
   });
 
   @override
@@ -28,7 +27,7 @@ class _PasswordFormFieldState extends State<PasswordFormField> {
       obscureText: !_isPasswordVisible,
       decoration: buildInputDecoration(
         labelText: widget.labelText,
-        icon: widget.icon, // <-- 3. Agora 'widget.icon' vai funcionar
+        icon: widget.icon, 
         suffixIcon: IconButton(
           icon: Icon(_isPasswordVisible
               ? Icons.visibility_outlined
