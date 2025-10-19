@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
-// Importe as telas para onde o menu navega
 import 'package:sync_pass/Feature/Generator/Screen/generator_screen.dart';
 import 'package:sync_pass/Feature/AddPass/Screen/add_pass_screen.dart';
 import 'package:sync_pass/Feature/Passcode/Screen/passcode_screen.dart';
 
-// Vamos precisar da cor customizada aqui também
 const Color customYellow = Color(0xFFE0A800);
 
 class HomeMenuGrid extends StatelessWidget {
@@ -13,7 +11,6 @@ class HomeMenuGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A lista de itens do menu agora mora dentro deste widget
     final List<Map<String, dynamic>> menuItems = [
       {
         'title': 'Minhas Senhas',
@@ -65,8 +62,6 @@ class HomeMenuGrid extends StatelessWidget {
   }
 }
 
-// Este é o widget que era o seu `_buildMenuItemCard`
-// Como ele só é usado aqui, podemos deixá-lo privado neste arquivo.
 class _MenuItemCard extends StatelessWidget {
   final String title;
   final IconData icon;

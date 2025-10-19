@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Cor customizada
 const Color customYellow = Color(0xFFE0A800);
 
 class HomeSecurityCarousel extends StatefulWidget {
@@ -14,7 +13,6 @@ class _HomeSecurityCarouselState extends State<HomeSecurityCarousel> {
   late PageController _pageController;
   int _currentPageIndex = 0;
 
-  // A lista de dicas agora mora dentro do estado deste widget
   final List<Map<String, dynamic>> _securityTips = [
     {
       'icon': Icons.lightbulb_outline,
@@ -59,7 +57,6 @@ class _HomeSecurityCarouselState extends State<HomeSecurityCarousel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Título da Seção
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
@@ -73,9 +70,8 @@ class _HomeSecurityCarouselState extends State<HomeSecurityCarousel> {
         ),
         const SizedBox(height: 16),
 
-        // O Carrossel (PageView)
         SizedBox(
-          height: 160, // Altura fixa para os cards
+          height: 160, 
           child: PageView.builder(
             controller: _pageController,
             itemCount: _securityTips.length,
@@ -86,7 +82,6 @@ class _HomeSecurityCarouselState extends State<HomeSecurityCarousel> {
             },
             itemBuilder: (context, index) {
               final tip = _securityTips[index];
-              // Usando o método privado para construir o card
               return _buildSecurityTipCard(
                 icon: tip['icon'],
                 title: tip['title'],
@@ -97,11 +92,9 @@ class _HomeSecurityCarouselState extends State<HomeSecurityCarousel> {
         ),
         const SizedBox(height: 16),
 
-        // Os Indicadores (pontos)
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(_securityTips.length, (index) {
-            // Usando o método privado para construir o indicador
             return _buildDotIndicator(isActive: index == _currentPageIndex);
           }),
         ),
@@ -109,7 +102,6 @@ class _HomeSecurityCarouselState extends State<HomeSecurityCarousel> {
     );
   }
 
-  // Método que era `_buildSecurityTipCard`
   Widget _buildSecurityTipCard(
       {required IconData icon,
       required String title,
@@ -164,7 +156,6 @@ class _HomeSecurityCarouselState extends State<HomeSecurityCarousel> {
     );
   }
 
-  // Método que era `_buildDotIndicator`
   Widget _buildDotIndicator({required bool isActive}) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
