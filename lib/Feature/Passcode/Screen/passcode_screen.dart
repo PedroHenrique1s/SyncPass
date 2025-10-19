@@ -15,7 +15,6 @@ class PasscodeScreen extends StatefulWidget {
 }
 
 class _PasscodeScreenState extends State<PasscodeScreen> {
-  // O service e o stream
   late final PasswordService _passwordService;
   Stream<QuerySnapshot>? _passwordsStream;
 
@@ -26,7 +25,6 @@ class _PasscodeScreenState extends State<PasscodeScreen> {
     _passwordsStream = _passwordService.getPasswordsStream();
   }
 
-  // O MÉTODO _buildItemCard FOI COMPLETAMENTE REMOVIDO DAQUI
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +46,6 @@ class _PasscodeScreenState extends State<PasscodeScreen> {
             return const Center(child: Text('Ocorreu um erro ao carregar os itens.'));
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            // Este widget de "estado vazio" também poderia ser refatorado
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -68,13 +65,10 @@ class _PasscodeScreenState extends State<PasscodeScreen> {
             );
           }
 
-          // MUDANÇA PRINCIPAL AQUI:
           return ListView(
             padding: const EdgeInsets.only(top: 8, bottom: 90),
             children: snapshot.data!.docs.map((DocumentSnapshot document) {
-              // 1. Converte o documento para o nosso model limpo
               final item = PasswordItem.fromDocument(document);
-              // 2. Retorna o nosso widget limpo
               return PasswordListItem(item: item);
             }).toList(),
           );

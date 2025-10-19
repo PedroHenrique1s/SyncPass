@@ -6,9 +6,6 @@ class PasswordService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  //
-  // --- MÉTODO 1 (Da AddPassScreen) ---
-  //
   Future<void> savePasswordData({
     required PasswordType type,
     required Map<String, dynamic> rawData,
@@ -57,11 +54,9 @@ class PasswordService {
     final User? user = _auth.currentUser;
 
     if (user == null) {
-      // Retorna um stream vazio se não houver usuário
       return const Stream.empty();
     }
 
-    // Lógica que estava no initState da PasscodeScreen
     return _firestore
       .collection('passwords')
       .where('userId', isEqualTo: user.uid)

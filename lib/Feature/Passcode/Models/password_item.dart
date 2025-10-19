@@ -16,7 +16,6 @@ class PasswordItem {
     required this.copySuccessMessage,
   });
 
-  // Esta fábrica converte o documento do Firebase no nosso modelo
   factory PasswordItem.fromDocument(DocumentSnapshot document) {
     final data = document.data() as Map<String, dynamic>;
     final String type = data['type'] ?? 'login';
@@ -27,7 +26,6 @@ class PasswordItem {
     String textToCopy;
     String copySuccessMessage;
 
-    // A lógica do 'switch' agora vive aqui, dentro do model
     switch (type) {
       case 'card':
         title = data['title'] ?? 'Cartão de Crédito';

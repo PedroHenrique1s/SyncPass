@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sync_pass/Feature/Passcode/Models/password_item.dart';
 
-// Sua cor customizada (idealmente, mova para um arquivo de tema)
 const Color customYellow = Color(0xFFE0A800);
 
 class PasswordListItem extends StatelessWidget {
@@ -10,7 +9,6 @@ class PasswordListItem extends StatelessWidget {
 
   const PasswordListItem({super.key, required this.item});
 
-  // Função de copiar movida para cá
   void _copyToClipboard(BuildContext context) {
     if (item.textToCopy.isNotEmpty) {
       Clipboard.setData(ClipboardData(text: item.textToCopy)).then((_) {
@@ -35,7 +33,6 @@ class PasswordListItem extends StatelessWidget {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         leading: CircleAvatar(
-          // Corrigindo a depreciação 'withOpacity'
           backgroundColor: customYellow.withAlpha(38), // 0.15 * 255 = 38
           child: Icon(item.iconData, color: customYellow),
         ),
