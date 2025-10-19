@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:sync_pass/Feature/Login/Screen/login_screen.dart';
+import 'package:sync_pass/Feature/Login/Screen/newlogin_screen.dart';
 import 'package:sync_pass/Feature/Login/Services/auth_method.dart';
 
 // Importe os novos widgets que criamos!
@@ -37,7 +37,7 @@ class HomeScreen extends StatelessWidget {
               await GoogleSignInService.signOut();
               if (context.mounted) {
                 Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  MaterialPageRoute(builder: (context) => const NewLoginScreen()),
                   (route) => false,
                 );
               }

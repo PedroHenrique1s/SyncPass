@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:sync_pass/Feature/Login/Screen/login_screen.dart';
+import 'package:sync_pass/Feature/Login/Screen/newlogin_screen.dart';
 import 'package:sync_pass/firebase_options.dart';
 
 Future<void> main() async {
@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const LoginScreen(),
+      home: const NewLoginScreen(),
     );
   }
 }

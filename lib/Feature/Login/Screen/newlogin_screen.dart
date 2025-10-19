@@ -2,7 +2,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sync_pass/Feature/Home/Screen/home_screen.dart';
-import 'package:sync_pass/Feature/Login/Screen/cpf_sreen.dart';
+import 'package:sync_pass/Feature/Login/Screen/login_screen.dart';
+import 'package:sync_pass/Feature/Login/Services/auth_method.dart';
 
 class NewLoginScreen extends StatefulWidget {
   const NewLoginScreen({super.key});
@@ -17,27 +18,64 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _isPasswordVisible = false;
-  bool _isLoading = false;
-  Future<void> _login() async {
-    // 1. Valida o formulário
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    // 2. Ativa o indicador de carregamento
+  Future<void> _signInWithGoogle() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // 3. Tenta fazer o login com o Firebase Auth DIRETAMENTE
+      final userCredential = await GoogleSignInService.signInWithGoogle();
+
+      if (mounted) {
+        if (userCredential != null && userCredential.user != null) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (Route<dynamic> route) => false,
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Login com Google cancelado.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao fazer login: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  bool _isPasswordVisible = false;
+  bool _isLoading = false;
+  Future<void> _login() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
       final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
-      // 4. Se o login for bem-sucedido, navega para a tela principal
       if (userCredential.user != null && mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -46,7 +84,6 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
       }
 
     } on FirebaseAuthException catch (e) {
-      // 5. Se o Firebase retornar um erro, mostra uma mensagem amigável
       String errorMessage = "Ocorreu um erro ao fazer login.";
       if (e.code == 'user-not-found' || e.code == 'invalid-email') {
         errorMessage = "Nenhum utilizador encontrado com este e-mail.";
@@ -63,7 +100,6 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
         );
       }
     } finally {
-      // 6. Garante que o indicador de carregamento pare, independentemente do resultado
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -114,13 +150,11 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
   }
 
   Future<void> _sendPasswordResetEmail(String email) async {
-    if (email.isEmpty) return; // Não faz nada se o e-mail estiver vazio
+    if (email.isEmpty) return; 
 
     try {
-      // Usa o método do Firebase para enviar o e-mail
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
 
-      // Mostra uma mensagem de sucesso
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -130,7 +164,6 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      // Mostra uma mensagem de erro
       String errorMessage = "Ocorreu um erro.";
       if (e.code == 'user-not-found' || e.code == 'invalid-email') {
         // Por segurança, não informamos se o e-mail existe ou não
@@ -160,8 +193,8 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
           child: Form(
             key: _formKey,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, // Centraliza o conteúdo
-              crossAxisAlignment: CrossAxisAlignment.stretch, // Estica os filhos na horizontal
+              mainAxisAlignment: MainAxisAlignment.center, 
+              crossAxisAlignment: CrossAxisAlignment.stretch, 
               children: [
                 const Spacer(flex: 2),
 
@@ -169,7 +202,7 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                 Image.asset('images/Logo.png', height: 100),
                 const SizedBox(height: 16),
                 const Text(
-                  "Bem-vindo de volta!",
+                  "Bem-vindo ao SyncPass!",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 28,
@@ -178,7 +211,7 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  "Faça login para continuar.",
+                  'Seu cofre digital sem complicações',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -187,7 +220,6 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // --- CAMPOS DE E-MAIL E SENHA MODERNIZADOS ---
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -195,7 +227,7 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                     labelText: "E-mail",
                     prefixIcon: const Icon(Icons.email_outlined),
                     filled: true,
-                    fillColor: Colors.black.withOpacity(0.04),
+                    fillColor: Colors.black.withAlpha(10),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -215,7 +247,7 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                       onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
                     ),
                     filled: true,
-                    fillColor: Colors.black.withOpacity(0.04),
+                    fillColor: Colors.black.withAlpha(10),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -252,6 +284,59 @@ class _NewLoginScreenState extends State<NewLoginScreen> {
                         : const Text('Entrar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   ),
                 ),
+
+                const SizedBox(height: 24), // Espaçamento
+
+              // Divisor "OU"
+              Row(
+                children: [
+                  Expanded(
+                    child: Divider(
+                      color: Colors.grey.shade300,
+                      thickness: 1,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      'ou',
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  ),
+                  Expanded(
+                    child: Divider(
+                      color: Colors.grey.shade300,
+                      thickness: 1,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24), // Espaçamento
+
+              // Botão do Google (O código que você tinha antes)
+              ElevatedButton.icon(
+                icon: Image.asset('images/google_logo.png', height: 22.0),
+                label: const Text('Conectar com Google', style: TextStyle(fontWeight: FontWeight.bold)),
+                
+                // IMPORTANTE: Você precisa ter essa função!
+                onPressed: _signInWithGoogle, 
+
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black87,
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  elevation: 2,
+                ),
+              ),
+              
+              // --- FIM DO CÓDIGO ADICIONADO ---
+
+              const Spacer(flex: 3),
 
                 const Spacer(flex: 3),
 
