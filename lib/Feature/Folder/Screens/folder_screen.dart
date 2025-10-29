@@ -37,7 +37,7 @@ class FolderScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: const FolderAddButton(),
+      floatingActionButton: FolderAddButton(),
     );
   }
 }

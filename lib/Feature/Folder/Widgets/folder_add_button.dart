@@ -1,4 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
+
+// Verifique se os caminhos dos seus serviços estão corretos
+import 'package:sync_pass/Feature/Folder/Services/folder_file_picker_service.dart';
+import 'package:sync_pass/Feature/Folder/Services/folder_storage_service.dart';
 
 const Color customYellow = Color(0xFFE0A800);
 
@@ -7,6 +13,7 @@ class FolderAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ... (build function sem alterações)
     return FloatingActionButton.extended(
       onPressed: () => _showAddOptions(context),
       backgroundColor: customYellow,
@@ -27,11 +34,13 @@ class FolderAddButton extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Container(
+      // 2. Renomeámos o 'context' do builder para 'modalBuilderContext'
+      builder: (modalBuilderContext) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // ... (Handle, Título, etc. - sem mudanças)
             Container(
               width: 40,
               height: 4,
@@ -55,8 +64,10 @@ class FolderAddButton extends StatelessWidget {
               subtitle: 'Use a câmera do dispositivo',
               color: Colors.blue,
               onTap: () {
-                Navigator.pop(context);
-                // Implementar captura de foto
+                // 3. Usamos o 'modalBuilderContext' para fechar o modal
+                Navigator.pop(modalBuilderContext);
+                
+                // 4. Usamos o 'context' da PÁGINA para abrir o novo modal
                 _showCategorySelector(context, 'camera');
               },
             ),
@@ -67,8 +78,10 @@ class FolderAddButton extends StatelessWidget {
               subtitle: 'Escolher da galeria',
               color: Colors.green,
               onTap: () {
-                Navigator.pop(context);
-                // Implementar seleção da galeria
+                // 3. Usamos o 'modalBuilderContext'
+                Navigator.pop(modalBuilderContext);
+                
+                // 4. Usamos o 'context' da PÁGINA
                 _showCategorySelector(context, 'gallery');
               },
             ),
@@ -79,8 +92,10 @@ class FolderAddButton extends StatelessWidget {
               subtitle: 'Selecionar PDF do dispositivo',
               color: Colors.red,
               onTap: () {
-                Navigator.pop(context);
-                // Implementar seleção de PDF
+                // 3. Usamos o 'modalBuilderContext'
+                Navigator.pop(modalBuilderContext);
+                
+                // 4. Usamos o 'context' da PÁGINA
                 _showCategorySelector(context, 'pdf');
               },
             ),
@@ -91,19 +106,22 @@ class FolderAddButton extends StatelessWidget {
     );
   }
 
+  // A função _showCategorySelector ESTÁ CORRETA. Não mude nada aqui.
   void _showCategorySelector(BuildContext context, String sourceType) {
     final categories = ['RG', 'CPF', 'CNH', 'Comprovantes', 'Outros'];
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Container(
+      builder: (modalContext) => Container( // Este 'modalContext' está correto
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // ... (Handle, Título, etc.)
             Container(
               width: 40,
               height: 4,
@@ -121,32 +139,88 @@ class FolderAddButton extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            ...categories.map((category) => ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: customYellow.withAlpha(26),
-                    child: Icon(
-                      _getCategoryIcon(category),
-                      color: customYellow,
-                    ),
-                  ),
-                  title: Text(
-                    category,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    Navigator.pop(context);
-                    // Aqui você vai implementar o upload real
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Upload de $sourceType para categoria $category',
+            ListView(
+              shrinkWrap: true,
+              children: categories
+                  .map((category) => ListTile(
+                        // ... (leading, title, trailing)
+                        leading: CircleAvatar(
+                          backgroundColor: customYellow.withAlpha(26),
+                          child: Icon(
+                            _getCategoryIcon(category),
+                            color: customYellow,
+                          ),
                         ),
-                        backgroundColor: customYellow,
-                      ),
-                    );
-                  },
-                )),
+                        title: Text(
+                          category,
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        trailing:
+                            const Icon(Icons.arrow_forward_ios, size: 16),
+                        
+                        onTap: () async {
+                          // PASSO 1: PEGAR O FICHEIRO
+                          File? file;
+                          switch (sourceType) {
+                            case 'camera':
+                              file = await FolderFilePickerService.pickFromCamera();
+                              break;
+                            case 'gallery':
+                              file = await FolderFilePickerService.pickFromGallery();
+                              break;
+                            case 'pdf':
+                              file = await FolderFilePickerService.pickPDF();
+                              break;
+                          }
+
+                          // PASSO 2: VALIDAR CONTEXTO E FICHEIRO
+                          // 'modalContext' (do builder) e 'context' (da página)
+                          if (!modalContext.mounted || !context.mounted) return;
+                          Navigator.pop(modalContext); // Fecha o modal de categorias
+                          
+                          if (file == null) return; // Utilizador cancelou
+
+                          // PASSO 3: VALIDAR TAMANHO
+                          if (!FolderFilePickerService.isValidFileSize(file)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Erro: Ficheiro muito grande (Max 10MB).'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          // PASSO 4: UPLOAD
+                          final String fileName = p.basename(file.path);
+                          final String? downloadUrl = await FolderStorageService.uploadFile(
+                            file: file,
+                            category: category,
+                            fileName: fileName,
+                          );
+
+                          // PASSO 5: FEEDBACK
+                          if (!context.mounted) return;
+                          if (downloadUrl != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Upload para $category concluído!'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                            // TODO: Salvar no Firestore
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Erro ao fazer upload para $category.'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                      ))
+                  .toList(),
+            ),
             const SizedBox(height: 20),
           ],
         ),
@@ -155,6 +229,7 @@ class FolderAddButton extends StatelessWidget {
   }
 
   IconData _getCategoryIcon(String category) {
+    // ... (Função sem alterações)
     switch (category) {
       case 'RG':
         return Icons.badge;
@@ -170,7 +245,9 @@ class FolderAddButton extends StatelessWidget {
   }
 }
 
+// O widget _AddOptionCard não precisa de NENHUMA alteração
 class _AddOptionCard extends StatelessWidget {
+  // ... (código sem alterações)
   final IconData icon;
   final String title;
   final String subtitle;
