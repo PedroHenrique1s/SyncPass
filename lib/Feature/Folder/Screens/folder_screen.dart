@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:sync_pass/Feature/Folder/Widgets/folder_header.dart';
-import 'package:sync_pass/Feature/Folder/Widgets/folder_categories.dart';
-import 'package:sync_pass/Feature/Folder/Widgets/folder_document_list.dart';
+import 'package:sync_pass/Feature/Folder/Widgets/folder_accordion_list.dart';
 import 'package:sync_pass/Feature/Folder/Widgets/folder_add_button.dart';
 
 const Color customYellow = Color(0xFFE0A800);
@@ -15,6 +13,7 @@ class FolderScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        // ... (Seu AppBar continua igual)
         title: const Text(
           'Meus Documentos',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
@@ -26,18 +25,17 @@ class FolderScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
+      // 4. ATUALIZE O BODY
       body: Column(
         children: [
           const FolderHeader(),
           const SizedBox(height: 16),
-          const FolderCategories(),
-          const SizedBox(height: 16),
           Expanded(
-            child: FolderDocumentList(),
+            child: FolderAccordionList(), // <- Nosso novo widget aqui!
           ),
         ],
       ),
-      floatingActionButton: FolderAddButton(),
+      floatingActionButton: const FolderAddButton(), // Continua igual
     );
   }
 }

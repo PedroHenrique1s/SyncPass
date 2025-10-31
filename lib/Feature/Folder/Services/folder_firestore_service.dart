@@ -47,6 +47,31 @@ class DocumentModel {
   }
 }
 
+class CategoryModel {
+  final String id;
+  final String name;
+  final String icon; // Armazena o NOME do ícone, ex: 'badge', 'folder_open'
+
+  CategoryModel({required this.id, required this.name, required this.icon});
+
+  // Converter de Map para Objeto
+  factory CategoryModel.fromMap(Map<String, dynamic> map, String id) {
+    return CategoryModel(
+      id: id,
+      name: map['name'] ?? '',
+      icon: map['icon'] ?? 'folder_open', // Ícone padrão
+    );
+  }
+
+  // Converter de Objeto para Map
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'icon': icon,
+    };
+  }
+}
+
 class FolderFirestoreService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -167,5 +192,59 @@ class FolderFirestoreService {
       debugPrint('Erro ao atualizar documento: $e');
       return false;
     }
+  }
+
+  static Future<bool> addCategory({
+    required String name,
+    required String icon, // O nome do ícone (ex: 'badge')
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return false;
+
+      // Verificar se a categoria já existe (evita duplicatas)
+      final existing = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('categories')
+          .where('name', isEqualTo: name)
+          .limit(1)
+          .get();
+
+      if (existing.docs.isNotEmpty) {
+        debugPrint('Categoria "$name" já existe.');
+        return false; // Falha (já existe)
+      }
+
+      final category = CategoryModel(id: '', name: name, icon: icon);
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('categories')
+          .add(category.toMap());
+
+      debugPrint('Categoria "$name" salva no Firestore');
+      return true;
+    } catch (e) {
+      debugPrint('Erro ao salvar categoria: $e');
+      return false;
+    }
+  }
+
+  static Stream<List<CategoryModel>> getCategories() {
+    final user = _auth.currentUser;
+    if (user == null) return Stream.value([]);
+
+    return _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('categories')
+        .orderBy('name') // Ordena por nome
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return CategoryModel.fromMap(doc.data(), doc.id);
+      }).toList();
+    });
   }
 }
