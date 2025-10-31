@@ -1,3 +1,5 @@
+// 1. IMPORTAMOS O 'dart:async' PARA USAR O TIMER
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 const Color customYellow = Color(0xFFE0A800);
@@ -12,6 +14,9 @@ class HomeSecurityCarousel extends StatefulWidget {
 class _HomeSecurityCarouselState extends State<HomeSecurityCarousel> {
   late PageController _pageController;
   int _currentPageIndex = 0;
+
+  // 2. DECLARAMOS A VARIÁVEL DO TIMER
+  Timer? _timer;
 
   final List<Map<String, dynamic>> _securityTips = [
     {
@@ -44,12 +49,37 @@ class _HomeSecurityCarouselState extends State<HomeSecurityCarousel> {
   void initState() {
     super.initState();
     _pageController = PageController(viewportFraction: 0.9, initialPage: 0);
+    // 3. INICIAMOS O TIMER QUANDO A TELA É CRIADA
+    _startTimer();
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    // 4. PARAMOS O TIMER QUANDO A TELA É DESTRUÍDA (MUITO IMPORTANTE!)
+    _timer?.cancel();
     super.dispose();
+  }
+
+  // 5. FUNÇÃO QUE CRIA E RODA O TIMER
+  void _startTimer() {
+    // Cancela qualquer timer anterior para evitar duplicatas
+    _timer?.cancel();
+    
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (!_pageController.hasClients) return; // Se o controller não estiver pronto, sai
+
+      int nextPage = _currentPageIndex + 1;
+      if (nextPage >= _securityTips.length) {
+        nextPage = 0; // Volta para o início
+      }
+
+      _pageController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    });
   }
 
   @override
@@ -70,27 +100,42 @@ class _HomeSecurityCarouselState extends State<HomeSecurityCarousel> {
         ),
         const SizedBox(height: 16),
 
-        SizedBox(
-          height: 160, 
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: _securityTips.length,
-            onPageChanged: (index) {
-              setState(() {
-                _currentPageIndex = index;
-              });
-            },
-            itemBuilder: (context, index) {
-              final tip = _securityTips[index];
-              return _buildSecurityTipCard(
-                icon: tip['icon'],
-                title: tip['title'],
-                description: tip['description'],
-              );
-            },
+        // 6. ADICIONAMOS O NotificationListener PARA PAUSAR O TIMER
+        NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            // Se o usuário começar a arrastar manualmente
+            if (notification is ScrollStartNotification &&
+                notification.dragDetails != null) {
+              _timer?.cancel();
+            }
+            // Se o usuário parar de arrastar
+            else if (notification is ScrollEndNotification) {
+              _startTimer();
+            }
+            return true; // Permite que a notificação continue
+          },
+          child: SizedBox(
+            height: 180,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: _securityTips.length,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPageIndex = index;
+                });
+              },
+              itemBuilder: (context, index) {
+                final tip = _securityTips[index];
+                return _buildSecurityTipCard(
+                  icon: tip['icon'],
+                  title: tip['title'],
+                  description: tip['description'],
+                );
+              },
+            ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 30),
 
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -141,15 +186,18 @@ class _HomeSecurityCarouselState extends State<HomeSecurityCarousel> {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 6),
-          Text(
-            description,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[700],
-              height: 1.3,
+          // 8. AJUSTEI O maxLines DA DESCRIÇÃO PARA CABER NO NOVO TAMANHO
+          Expanded(
+            child: Text(
+              description,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[700],
+                height: 1.3,
+              ),
+              maxLines: 4, // Aumentei de 3 para 4
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -157,6 +205,7 @@ class _HomeSecurityCarouselState extends State<HomeSecurityCarousel> {
   }
 
   Widget _buildDotIndicator({required bool isActive}) {
+    // ... (Esta função continua igual, sem mudanças)
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       margin: const EdgeInsets.symmetric(horizontal: 4.0),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sync_pass/Feature/Folder/Screens/folder_Screen.dart';
 
 import 'package:sync_pass/Feature/Generator/Screen/generator_screen.dart';
 import 'package:sync_pass/Feature/AddPass/Screen/add_pass_screen.dart';
 import 'package:sync_pass/Feature/Passcode/Screen/passcode_screen.dart';
+
 
 const Color customYellow = Color(0xFFE0A800);
 
@@ -33,9 +35,8 @@ class HomeMenuGrid extends StatelessWidget {
       {
         'title': 'Anexar Arquivos',
         'icon': Icons.folder_copy_outlined,
-        'onTap': () {
-          /* Lógica de navegação */
-        }
+        'onTap': () => Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const FolderScreen()))
       },
     ];
 
