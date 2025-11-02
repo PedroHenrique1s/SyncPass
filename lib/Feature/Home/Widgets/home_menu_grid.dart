@@ -33,7 +33,7 @@ class HomeMenuGrid extends StatelessWidget {
             context, MaterialPageRoute(builder: (_) => const GeneratorScreen()))
       },
       {
-        'title': 'Anexar Arquivos',
+        'title': 'Carteira Digital',
         'icon': Icons.folder_copy_outlined,
         'onTap': () => Navigator.push(
             context, MaterialPageRoute(builder: (_) => const FolderScreen()))
