@@ -60,6 +60,18 @@ class FolderAddButton extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
+            _AddOptionCard(
+              icon: Icons.create_new_folder_outlined,
+              title: 'Nova Categoria',
+              subtitle: 'Adicionar uma nova categoria',
+              color: const Color.fromARGB(188, 187, 187, 16),
+              onTap: () {
+                Navigator.pop(modalBuilderContext);
+                _showAddCategoryDialog(context);
+              },
+            ),
+            const SizedBox(height: 12),
+
             // Card 'Tirar Foto' (Completo)
             _AddOptionCard(
               icon: Icons.camera_alt,
@@ -93,18 +105,6 @@ class FolderAddButton extends StatelessWidget {
               onTap: () {
                 Navigator.pop(modalBuilderContext);
                 _showCategorySelector(context, 'pdf');
-              },
-            ),
-            const SizedBox(height: 12),
-
-            _AddOptionCard(
-              icon: Icons.create_new_folder_outlined,
-              title: 'Nova Categoria',
-              subtitle: 'Adicionar uma nova categoria',
-              color: const Color.fromARGB(188, 187, 187, 16),
-              onTap: () {
-                Navigator.pop(modalBuilderContext);
-                _showAddCategoryDialog(context);
               },
             ),
             const SizedBox(height: 40), 

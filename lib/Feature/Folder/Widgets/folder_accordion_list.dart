@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import 'package:sync_pass/Feature/Folder/Services/folder_firestore_service.dart';
 import 'package:sync_pass/Feature/Folder/Services/folder_storage_service.dart';
 import 'package:sync_pass/Feature/Folder/Services/folder_file_picker_service.dart';
+import 'package:url_launcher/url_launcher.dart'; 
 
 const Color customYellow = Color(0xFFE0A800);
 
@@ -426,15 +427,25 @@ class _FolderAccordionListState extends State<FolderAccordionList> {
                         ),
                         icon: const Icon(Icons.open_in_browser),
                         label: const Text('Abrir no Navegador', style: TextStyle(fontWeight: FontWeight.w600)),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text('Funcionalidade em desenvolvimento'),
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              margin: const EdgeInsets.all(16),
-                            ),
-                          );
+                        onPressed: () async { 
+                          final Uri uri = Uri.parse(pdfUrl);
+
+                          if (!await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          )) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Não foi possível abrir o arquivo: $pdfName'),
+                                  backgroundColor: Colors.redAccent,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  margin: const EdgeInsets.all(16),
+                                ),
+                              );
+                            }
+                          }
                         },
                       ),
                     ],
