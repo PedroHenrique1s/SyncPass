@@ -21,7 +21,6 @@ class DocumentModel {
     required this.createdAt,
   });
 
-  // Converter de Map para Objeto
   factory DocumentModel.fromMap(Map<String, dynamic> map, String id) {
     return DocumentModel(
       id: id,
@@ -34,7 +33,6 @@ class DocumentModel {
     );
   }
 
-  // Converter de Objeto para Map
   Map<String, dynamic> toMap() {
     return {
       'name': name,
@@ -50,20 +48,18 @@ class DocumentModel {
 class CategoryModel {
   final String id;
   final String name;
-  final String icon; // Armazena o NOME do ícone, ex: 'badge', 'folder_open'
+  final String icon;
 
   CategoryModel({required this.id, required this.name, required this.icon});
 
-  // Converter de Map para Objeto
   factory CategoryModel.fromMap(Map<String, dynamic> map, String id) {
     return CategoryModel(
       id: id,
       name: map['name'] ?? '',
-      icon: map['icon'] ?? 'folder_open', // Ícone padrão
+      icon: map['icon'] ?? 'folder_open',
     );
   }
 
-  // Converter de Objeto para Map
   Map<String, dynamic> toMap() {
     return {
       'name': name,
@@ -76,7 +72,6 @@ class FolderFirestoreService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Adicionar documento
   static Future<bool> addDocument({
     required String name,
     required String category,
@@ -112,7 +107,6 @@ class FolderFirestoreService {
     }
   }
 
-  // Buscar todos os documentos do usuário
   static Stream<List<DocumentModel>> getDocuments() {
     final user = _auth.currentUser;
     if (user == null) return Stream.value([]);
@@ -130,7 +124,6 @@ class FolderFirestoreService {
     });
   }
 
-  // Buscar documentos por categoria
   static Stream<List<DocumentModel>> getDocumentsByCategory(String category) {
     final user = _auth.currentUser;
     if (user == null) return Stream.value([]);
@@ -153,7 +146,6 @@ class FolderFirestoreService {
     });
   }
 
-  // Deletar documento
   static Future<bool> deleteDocument(String documentId) async {
     try {
       final user = _auth.currentUser;
@@ -174,7 +166,6 @@ class FolderFirestoreService {
     }
   }
 
-  // Atualizar nome do documento
   static Future<bool> updateDocumentName(String documentId, String newName) async {
     try {
       final user = _auth.currentUser;
@@ -196,13 +187,12 @@ class FolderFirestoreService {
 
   static Future<bool> addCategory({
     required String name,
-    required String icon, // O nome do ícone (ex: 'badge')
+    required String icon,
   }) async {
     try {
       final user = _auth.currentUser;
       if (user == null) return false;
 
-      // Verificar se a categoria já existe (evita duplicatas)
       final existing = await _firestore
           .collection('users')
           .doc(user.uid)
@@ -213,7 +203,7 @@ class FolderFirestoreService {
 
       if (existing.docs.isNotEmpty) {
         debugPrint('Categoria "$name" já existe.');
-        return false; // Falha (já existe)
+        return false;
       }
 
       final category = CategoryModel(id: '', name: name, icon: icon);
@@ -239,12 +229,33 @@ class FolderFirestoreService {
         .collection('users')
         .doc(user.uid)
         .collection('categories')
-        .orderBy('name') // Ordena por nome
+        .orderBy('name')
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
         return CategoryModel.fromMap(doc.data(), doc.id);
       }).toList();
     });
+  }
+
+  // NOVO MÉTODO: Deletar categoria
+  static Future<bool> deleteCategory(String categoryId) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return false;
+
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('categories')
+          .doc(categoryId)
+          .delete();
+
+      debugPrint('Categoria deletada do Firestore');
+      return true;
+    } catch (e) {
+      debugPrint('Erro ao deletar categoria: $e');
+      return false;
+    }
   }
 }
