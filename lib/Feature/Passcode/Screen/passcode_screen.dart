@@ -25,6 +25,48 @@ class _PasscodeScreenState extends State<PasscodeScreen> {
     _passwordsStream = _passwordService.getPasswordsStream();
   }
 
+  // =======================================================
+  // NOVAS FUNÇÕES DE AÇÃO (EDITAR E EXCLUIR)
+  // =======================================================
+
+  /// Função chamada pelo [PasswordListItem] quando "Excluir" é pressionado
+  void _handleDelete(PasswordItem item) async {
+    try {
+      // Chama o serviço para excluir o item usando seu ID
+      await _passwordService.deletePassword(item.documentId);
+      
+      // Feedback visual para o usuário
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${item.title} excluído com sucesso!'),
+            backgroundColor: Colors.red[600],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao excluir ${item.title}: $e'),
+            backgroundColor: Colors.red[900],
+          ),
+        );
+      }
+    }
+  }
+
+  /// Função chamada pelo [PasswordListItem] quando "Editar" é pressionado
+  void _handleEdit(PasswordItem item) {
+    // Navega para a tela de Adicionar/Editar, passando o item
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        // Passa o 'itemToEdit' para a AddPassScreen entrar em modo de edição
+        builder: (context) => AddPassScreen(itemToEdit: item),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +81,7 @@ class _PasscodeScreenState extends State<PasscodeScreen> {
       body: StreamBuilder<QuerySnapshot>(
         stream: _passwordsStream,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          // --- Seus tratamentos de estado (waiting, error, empty) ---
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator(color: customYellow));
           }
@@ -65,11 +108,20 @@ class _PasscodeScreenState extends State<PasscodeScreen> {
             );
           }
 
+          // =======================================================
+          // CONSTRUÇÃO DA LISTA (MODIFICADO)
+          // =======================================================
           return ListView(
             padding: const EdgeInsets.only(top: 8, bottom: 90),
             children: snapshot.data!.docs.map((DocumentSnapshot document) {
               final item = PasswordItem.fromDocument(document);
-              return PasswordListItem(item: item);
+              
+              // ATUALIZADO: Passando as funções de callback para o widget
+              return PasswordListItem(
+                item: item,
+                onDelete: _handleDelete, // Passa a função de exclusão
+                onEdit: _handleEdit,     // Passa a função de edição
+              );
             }).toList(),
           );
         },
@@ -78,7 +130,10 @@ class _PasscodeScreenState extends State<PasscodeScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddPassScreen()),
+            MaterialPageRoute(
+              // Chama AddPassScreen sem 'itemToEdit' (Modo Adição)
+              builder: (context) => const AddPassScreen(),
+            ),
           );
         },
         backgroundColor: customYellow,
