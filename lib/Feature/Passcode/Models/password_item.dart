@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PasswordItem {
+  // NOVO: ID do documento no Firestore, essencial para Editar e Excluir.
+  final String documentId; 
+  
+  // NOVO: Dados originais do Firestore, úteis para pré-preencher a tela de edição.
+  final Map<String, dynamic> rawData; 
+  
   final String title;
   final String subtitle;
   final IconData iconData;
@@ -9,6 +15,8 @@ class PasswordItem {
   final String copySuccessMessage;
 
   PasswordItem({
+    required this.documentId, // NOVO
+    required this.rawData,    // NOVO
     required this.title,
     required this.subtitle,
     required this.iconData,
@@ -57,6 +65,8 @@ class PasswordItem {
     }
 
     return PasswordItem(
+      documentId: document.id,  // NOVO: Pega o ID do documento
+      rawData: data,           // NOVO: Salva todos os dados
       title: title,
       subtitle: subtitle,
       iconData: iconData,
