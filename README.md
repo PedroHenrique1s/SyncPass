@@ -19,7 +19,7 @@ Um gerenciador de senhas móvel, seguro e sincronizado, construído com Flutter 
 
 | Tela de Login | Tela Principal (Cofre) |
 | :---: | :---: |
-| [![syncPassjpeg](https://github.com/user-attachments/assets/3cb78e97-995c-4c2c-997a-d112469fabee)] | [![telaINicialjpeg](https://github.com/user-attachments/assets/2ca830e6-7f0b-4684-80c2-55f371864dd6)] 
+| ![syncPassjpeg](https://github.com/user-attachments/assets/3cb78e97-995c-4c2c-997a-d112469fabee) | ![telaINicialjpeg](https://github.com/user-attachments/assets/2ca830e6-7f0b-4684-80c2-55f371864dd6)
 
 ## 🚀 Tecnologias Utilizadas
 
@@ -46,3 +46,5 @@ Para rodar este projeto localmente, siga os passos abaixo:
 ```bash
 git clone [https://github.com/PedroHenrique1s/SyncPass.git](https://github.com/PedroHenrique1s/SyncPass.git)
 cd SyncPass
+
+
