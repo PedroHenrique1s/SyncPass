@@ -46,5 +46,7 @@ Para rodar este projeto localmente, siga os passos abaixo:
 ```bash
 git clone [https://github.com/PedroHenrique1s/SyncPass.git](https://github.com/PedroHenrique1s/SyncPass.git)
 cd SyncPass
+flutter pub get
+flutter run
 
 
